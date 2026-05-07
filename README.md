@@ -1,31 +1,3 @@
-
-```markdown
-<!-- English --!>
-
-<p align="center">
-  <a href="https://m-z-developer.github.io/CQRCrypto/">
-    <img src="https://img.shields.io/badge/🚀_Live_Demo-CQRCrypto_Level_5-ff5722?style=for-the-badge" alt="Live Demo" />
-  </a>
-</p>
-
-<h1 align="center">🛡️ CQRCrypto Level 5</h1>
-<h3 align="center">Military‑Grade Post‑Quantum Cryptography — Zero Dependencies, Browser‑Native</h3>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Security-Level%205%20(Top%20Secret)-informational?style=flat-square&color=blue" />
-  <img src="https://img.shields.io/badge/ML‑DSA-87-brightgreen?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" />
-  <img src="https://img.shields.io/badge/ML‑KEM-1024-orange?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" />
-  <img src="https://img.shields.io/badge/AES-256‑GCM-blueviolet?style=flat-square" />
-  <img src="https://img.shields.io/badge/PBKDF2‑SHA512-600k%20iterations-9cf?style=flat-square" />
-  <br/>
-  <img src="https://img.shields.io/badge/Air‑Gapped%20Ready-yes-success?style=flat-square" />
-  <img src="https://img.shields.io/badge/Zero%20Dependencies-true-success?style=flat-square" />
-  <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" />
-  <img src="https://img.shields.io/badge/Live%20Demo-available-ff5722?style=flat-square" />
-</p>
-
----
-
 ## 🌐 Live Interactive Demo
 
 **Try the full CQRCrypto Level‑5 system right in your browser – no server, no installation:**  
@@ -287,7 +259,8 @@ MIT License – see [LICENSE](./LICENSE) for full text.
 ## 🌐 معاينة تفاعلية مباشرة
 
 جرب النظام بالكامل في متصفحك دون تثبيت:  
-👉 **[https://m-z-developer.github.io/CQRCrypto/](https://m-z-developer.github.io/CQRCrypto/)**
+👇
+**[https://m-z-developer.github.io/CQRCrypto/](https://m-z-developer.github.io/CQRCrypto/)**
 
 ---
 
