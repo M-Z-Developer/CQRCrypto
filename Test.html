@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CQRCrypto Test Bench</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --text: #0f172a;
+            --card-bg: #ffffff;
+            --card-border: #cbd5e1;
+            --pre-bg: #f1f5f9;
+            --pre-text: #0f172a;
+            --btn-bg: #0284c7;
+            --btn-hover: #0369a1;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #cbd5e1;
+                --card-bg: #1e293b;
+                --card-border: #334155;
+                --pre-bg: #000000;
+                --pre-text: #a3e635;
+                --btn-bg: #0284c7;
+                --btn-hover: #0369a1;
+            }
+        }
+
+        body {
+            font-family: 'Consolas', monospace;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            margin: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h1 {
+            color: #38bdf8;
+            text-align: center;
+            border-bottom: 1px dashed var(--card-border);
+            padding-bottom: 10px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .lang-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: transparent;
+            color: #38bdf8;
+            border: 1px solid #38bdf8;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: auto;
+            margin: 0;
+        }
+        button.main-btn {
+            background-color: var(--btn-bg);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            display: block;
+            margin: 20px auto;
+            width: 100%;
+        }
+        button.main-btn:hover { background-color: var(--btn-hover); }
+        button.main-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .log-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+        }
+        .log-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .log-content {
+            background-color: var(--pre-bg);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--pre-text);
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+        }
+        .log-content.error { color: #f87171; }
+        
+        .step-success { border-inline-start: 5px solid #22c55e; }
+        .step-info { border-inline-start: 5px solid #38bdf8; }
+        .step-warning { border-inline-start: 5px solid #f59e0b; }
+        .step-error { border-inline-start: 5px solid #ef4444; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <button id="langToggle" class="lang-btn" onclick="toggleLanguage()">العربية</button>
+        <h1 id="t_title">🛠️ CQRCrypto Test Bench 🛠️</h1>
+        <p id="t_desc" style="text-align:center;">This screen tests the full encryption and decryption lifecycle while displaying keys and payloads</p>
+        
+        <button onclick="runTestLifecycle()" id="startBtn" class="main-btn">▶️ Start Full Test Cycle</button>
+
+        <div id="logs-container"></div>
+    </div>
+
+    <script src="CQRCrypto.js"></script>
+
+    <script>
+        const dict = {
+            en: {
+                lang: "العربية", title: "🛠️ CQRCrypto Test Bench 🛠️", desc: "This screen tests the full encryption and decryption lifecycle while displaying keys and payloads", btn: "▶️ Start Full Test Cycle",
+                l1_title: "1️⃣ Library Initialization", l1_desc: "CQRCrypto library is ready to use.",
+                l2_title: "2️⃣ Create Sender Identity", l2_pub: "Sender Public Key (to share)", l2_priv: "Sender Private Key (to sign)",
+                l3_title: "3️⃣ Create Receiver Identity", l3_pub: "Receiver Public Key (to encrypt to)", l3_priv: "Receiver Private Key (to decrypt)",
+                l4_title: "4️⃣ Original Message Text", l4_text: "Hello, this is a top secret message 🕵️‍♂️",
+                l5_w_title: "⚙️ Encrypting...", l5_w_desc: "Encrypting text with receiver's public key, and signing with sender's private key...",
+                l5_title: "5️⃣ Result: Encrypted Payload", l5_err_title: "❌ Encryption Error",
+                l6_w_title: "⚙️ Decrypting...", l6_w_desc: "Decrypting with receiver's private key, and verifying signature with sender's public key...",
+                l6_title: "6️⃣ Result: Decryption Successful ✅", l6_status: "Signature Status", l6_status_v: "Sender signature is valid and verified", l6_msg: "Extracted Message",
+                l6_err_title: "❌ Decryption Error", l6_trace: "🔍 Stack Trace", l_unexp: "❌ Unexpected Error", err_dec: "Decryption Failed 🔒: Private key does not match intended recipient or message tampered",
+                err_ext: "Fatal error during key extraction"
+            },
+            ar: {
+                lang: "English", title: "🛠️ بيئة اختبار التشفير الكمي CQRCrypto 🛠️", desc: "هذه الشاشة تقوم باختبار دورة التشفير وفك التشفير بالكامل مع إظهار المفاتيح والبيانات", btn: "▶️ بدء عملية الاختبار الشاملة",
+                l1_title: "1️⃣ تهيئة المكتبة", l1_desc: "مكتبة CQRCrypto جاهزة للعمل.",
+                l2_title: "2️⃣ إنشاء هوية المرسل (Sender)", l2_pub: "المفتاح العام للمرسل (لإرساله للناس)", l2_priv: "المفتاح الخاص للمرسل (للتوقيع)",
+                l3_title: "3️⃣ إنشاء هوية المستلم (Receiver)", l3_pub: "المفتاح العام للمستلم (للتشفير له)", l3_priv: "المفتاح الخاص للمستلم (لفك التشفير)",
+                l4_title: "4️⃣ النص الأصلي للرسالة", l4_text: "مرحبا، هذه رسالة سرية للغاية 🕵️‍♂️",
+                l5_w_title: "⚙️ جاري التشفير...", l5_w_desc: "يتم الآن تشفير النص بالمفتاح العام للمستلم، وتوقيعه بالمفتاح الخاص للمرسل...",
+                l5_title: "5️⃣ النتيجة: الحزمة المشفرة (Encrypted Payload)", l5_err_title: "❌ خطأ أثناء التشفير",
+                l6_w_title: "⚙️ جاري فك التشفير...", l6_w_desc: "يتم الآن فك التشفير باستخدام المفتاح الخاص للمستلم، والتحقق من التوقيع باستخدام المفتاح العام للمرسل...",
+                l6_title: "6️⃣ النتيجة: فك التشفير ناجح ✅", l6_status: "حالة التوقيع", l6_status_v: "توقيع المرسل صحيح وتم التحقق منه", l6_msg: "الرسالة المستخرجة",
+                l6_err_title: "❌ خطأ أثناء فك التشفير", l6_trace: "🔍 تتبع الخطأ (Stack Trace)", l_unexp: "❌ خطأ غير متوقع", err_dec: "فشل فك التشفير 🔒: المفتاح لا يطابق المستلم أو تم التلاعب بالرسالة",
+                err_ext: "خطأ فادح أثناء استخراج المفتاح"
+            }
+        };
+
+        const errorMap = {
+            "Decryption Failed 🔒: The private key provided does not match the intended recipient, or the message has been tampered with in transit": "err_dec",
+            "Fatal error during key extraction": "err_ext"
+        };
+
+        let currentLang = 'en';
+        const logsContainer = document.getElementById('logs-container');
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+            document.getElementById('langToggle').textContent = dict[currentLang].lang;
+            document.getElementById('t_title').textContent = dict[currentLang].title;
+            document.getElementById('t_desc').textContent = dict[currentLang].desc;
+            document.getElementById('startBtn').textContent = dict[currentLang].btn;
+            logsContainer.innerHTML = '';
+        }
+
+        function getErrorText(eMsg) {
+            const code = errorMap[eMsg];
+            return code ? dict[currentLang][code] : eMsg;
+        }
+
+        function printLog(title, content, type = 'info') {
+            const div = document.createElement('div');
+            let typeClass = 'step-info';
+            if(type === 'success') typeClass = 'step-success';
+            if(type === 'error') typeClass = 'step-error';
+            if(type === 'warning') typeClass = 'step-warning';
+
+            div.className = `log-box ${typeClass}`;
+            let formattedContent = typeof content === 'object' ? JSON.stringify(content, null, 2) : content;
+            
+            div.innerHTML = `
+                <div class="log-title">${title}</div>
+                <pre class="log-content ${type === 'error' ? 'error' : ''}">${formattedContent}</pre>
+            `;
+            logsContainer.appendChild(div);
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        async function runTestLifecycle() {
+            document.getElementById('startBtn').disabled = true;
+            logsContainer.innerHTML = ''; 
+            const d = dict[currentLang];
+            
+            try {
+                const cqr = new CQRCrypto();
+                printLog(d.l1_title, d.l1_desc, 'success');
+
+                const sender = cqr.generateIdentity();
+                printLog(d.l2_title, {
+                    [d.l2_pub]: sender.cqrPublicKey,
+                    [d.l2_priv]: sender.cqrPrivateKey
+                }, 'info');
+
+                const receiver = cqr.generateIdentity();
+                printLog(d.l3_title, {
+                    [d.l3_pub]: receiver.cqrPublicKey,
+                    [d.l3_priv]: receiver.cqrPrivateKey
+                }, 'info');
+
+                const plaintext = d.l4_text;
+                printLog(d.l4_title, plaintext, 'info');
+
+                printLog(d.l5_w_title, d.l5_w_desc, 'warning');
+                
+                let encryptedPayload;
+                try {
+                    encryptedPayload = await cqr.encryptSecretMessage(plaintext, receiver.cqrPublicKey, sender.cqrPrivateKey);
+                    printLog(d.l5_title, encryptedPayload, 'success');
+                } catch (encErr) {
+                    printLog(d.l5_err_title, getErrorText(encErr.message), 'error');
+                    return;
+                }
+
+                printLog(d.l6_w_title, d.l6_w_desc, 'warning');
+                
+                try {
+                    const decryptedResult = await cqr.decryptSecretMessage(encryptedPayload, sender.cqrPublicKey, receiver.cqrPrivateKey);
+                    
+                    if(decryptedResult.isValid) {
+                        printLog(d.l6_title, {
+                            [d.l6_status]: d.l6_status_v,
+                            [d.l6_msg]: decryptedResult.message
+                        }, 'success');
+                    }
+                } catch (decErr) {
+                    printLog(d.l6_err_title, getErrorText(decErr.message), 'error');
+                    printLog(d.l6_trace, decErr.stack, 'error');
+                }
+
+            } catch (globalErr) {
+                printLog(d.l_unexp, getErrorText(globalErr.message), 'error');
+            } finally {
+                document.getElementById('startBtn').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

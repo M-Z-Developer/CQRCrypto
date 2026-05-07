@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CQRCrypto Level 5 | Military Post-Quantum Encryption</title>
+    <script src="./tailwind.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: { extend: {} }
+        }
+    </script>
+    <script src="./CQRCrypto.js"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        .card { border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); }
+        .btn { transition: all 0.2s ease; }
+        .btn:active { transform: scale(0.97); }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; transition: opacity 0.3s ease; }
+        pre, textarea, input[dir="ltr"] { direction: ltr; text-align: left; }
+        .modal-overlay { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+        .rule-check.valid { color: #16a34a; font-weight: bold; }
+        .rule-check.valid::before { content: '✅ '; }
+        .rule-check.invalid { color: #dc2626; }
+        .rule-check.invalid::before { content: '❌ '; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    
+    <button id="langToggleBtn" class="absolute top-4 right-4 md:top-8 md:right-8 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition-colors">
+        العربية
+    </button>
+
+    <div class="w-full max-w-5xl mt-12 md:mt-0">
+        <header class="text-center mb-12">
+            <h1 id="t_main_title" class="text-4xl md:text-5xl font-extrabold mb-2">🛡️ CQR Quantum Encryption System</h1>
+            <p id="t_sub_title" class="text-lg font-bold bg-yellow-200 dark:bg-yellow-700 dark:text-yellow-100 text-gray-800 inline-block px-3 py-1 rounded">Security Level: Grade 5 (Top Secret - ML-DSA-87 / ML-KEM-1024)</p>
+            <div class="block mt-3 px-4 py-1 text-gray-500 dark:text-gray-400 text-xs font-bold">
+                CQRCrypto Offline Node | Developed by: mz-developer.xmr
+            </div>
+        </header>
+
+        <div class="card p-6 md:p-8 mb-8 border-t-4 border-indigo-600 bg-white dark:bg-slate-800">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">🔑</span>
+                <h2 id="t_id_mng" class="text-2xl font-bold">1. Military Identity Management (CQR - Level 5)</h2>
+            </div>
+
+            <div class="flex gap-4 mb-6 bg-gray-100 dark:bg-slate-700 p-2 rounded-xl">
+                <button id="tabGenerateKey" class="flex-1 py-2 rounded-lg font-bold text-gray-800 dark:text-gray-100 bg-white dark:bg-slate-600 shadow transition-all"><span id="t_gen_new">🆕 Generate New Identity</span></button>
+                <button id="tabImportKey" class="flex-1 py-2 rounded-lg font-bold text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all"><span id="t_import_saved">💾 Import Saved Identity</span></button>
+            </div>
+
+            <div id="generateKeyArea" class="block">
+                <button id="generateBtn" class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg flex items-center justify-center gap-2 mx-auto w-full md:w-auto text-lg">
+                    <span id="spinner" class="hidden animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
+                    <span id="t_gen_btn">Generate CQR Keys (Level 5)</span>
+                </button>
+            </div>
+
+            <div id="importKeyArea" class="hidden space-y-6">
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-6 rounded-xl border border-blue-200 dark:border-blue-800 text-center">
+                    <h3 id="t_import_file_title" class="font-bold text-blue-800 dark:text-blue-300 mb-2">Import from Secure File</h3>
+                    <p id="t_import_file_desc" class="text-sm text-blue-600 dark:text-blue-400 mb-4">Upload encrypted identity file (.json)</p>
+                    <input type="file" id="identityFileInput" accept=".json" class="hidden" />
+                    <button id="triggerFileInputBtn" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow">
+                        <span id="t_choose_file">📂 Choose Encrypted File</span>
+                    </button>
+                </div>
+                
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+                    <span id="t_or_manual" class="flex-shrink-0 mx-4 text-gray-400 text-sm">Or manual entry</span>
+                    <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-50 hover:opacity-100 transition-opacity">
+                    <div>
+                        <label id="t_lbl_priv_imp" class="block text-sm font-bold mb-1">CQR Private Key (Top Secret)</label>
+                        <textarea id="importCqrPriv" rows="4" class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-transparent rounded-lg text-xs font-mono outline-none resize-none" dir="ltr"></textarea>
+                    </div>
+                    <div>
+                        <label id="t_lbl_pub_imp" class="block text-sm font-bold mb-1">CQR Public Key (Sharable)</label>
+                        <textarea id="importCqrPub" rows="4" class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-transparent rounded-lg text-xs font-mono outline-none resize-none" dir="ltr"></textarea>
+                    </div>
+                </div>
+                <button id="importManualBtn" class="btn bg-gray-800 dark:bg-slate-600 hover:bg-gray-900 text-white font-bold py-2 px-6 rounded-xl shadow mx-auto flex">
+                    <span id="t_btn_manual">✅ Adopt Manual Keys</span>
+                </button>
+            </div>
+
+            <div id="keysOutput" class="mt-8 hidden pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col md:flex-row justify-center gap-4 mb-8">
+                    <button id="exportPrivateBtn" class="btn bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg flex items-center gap-2 justify-center">
+                        <span id="t_btn_exp_priv">🔒 Secure & Export Identity</span>
+                    </button>
+                    <button id="exportPublicBtn" class="btn bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg flex items-center gap-2 justify-center">
+                        <span id="t_btn_exp_pub">🌐 Share Identity (Public)</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-3 p-5 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 shadow-inner">
+                        <h3 id="t_box_priv_title" class="font-bold text-red-800 dark:text-red-400 text-center mb-1">🔒 Private Key (CQR Private)</h3>
+                        <p id="t_box_priv_warn" class="text-[11px] text-red-600 dark:text-red-500 text-center mb-3 font-bold">⚠️ WARNING: Used for signing and decryption. DO NOT SHARE!</p>
+                        <div class="relative">
+                            <textarea id="cqrPrivOut" readonly rows="5" class="w-full p-3 bg-white dark:bg-slate-900 border border-red-300 dark:border-red-800 rounded-lg text-[10px] font-mono text-red-900 dark:text-red-300 outline-none resize-none"></textarea>
+                            <button data-copy="cqrPrivOut" id="t_copy_1" class="absolute top-2 left-2 bg-red-200 dark:bg-red-800 hover:bg-red-300 text-red-800 dark:text-red-100 px-3 py-1.5 rounded text-xs font-bold shadow">Copy</button>
+                        </div>
+                    </div>
+                    <div class="space-y-3 p-5 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800 shadow-inner">
+                        <h3 id="t_box_pub_title" class="font-bold text-green-800 dark:text-green-400 text-center mb-1">🌐 Public Key (CQR Public)</h3>
+                        <p id="t_box_pub_warn" class="text-[11px] text-green-600 dark:text-green-500 text-center mb-3 font-bold">✅ Safe to share: Used to verify you and encrypt messages to you.</p>
+                        <div class="relative">
+                            <textarea id="cqrPubOut" readonly rows="5" class="w-full p-3 bg-white dark:bg-slate-900 border border-green-300 dark:border-green-800 rounded-lg text-[10px] font-mono text-green-900 dark:text-green-300 outline-none resize-none"></textarea>
+                            <button data-copy="cqrPubOut" id="t_copy_2" class="absolute top-2 left-2 bg-green-200 dark:bg-green-800 hover:bg-green-300 text-green-800 dark:text-green-100 px-3 py-1.5 rounded text-xs font-bold shadow">Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-6 md:p-8 mb-8 border-t-4 border-emerald-500 bg-white dark:bg-slate-800" id="payloadSection" style="display: none;">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">✍️</span>
+                <h2 id="t_send_title" class="text-2xl font-bold">2. Transmission (Sign & Encrypt)</h2>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 mb-6 bg-gray-100 dark:bg-slate-700 p-2 rounded-xl text-sm">
+                <button id="tabMessage" class="flex-1 py-2 px-2 rounded-lg font-bold text-gray-800 dark:text-gray-100 bg-white dark:bg-slate-600 shadow transition-all"><span id="t_tab_msg">📝 Message (Sign)</span></button>
+                <button id="tabEncrypt" class="flex-1 py-2 px-2 rounded-lg font-bold text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all"><span id="t_tab_enc">🔒 Message (Encrypt + Sign)</span></button>
+                <button id="tabDid" class="flex-1 py-2 px-2 rounded-lg font-bold text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all"><span id="t_tab_did">🪪 DID Document</span></button>
+            </div>
+
+            <div id="contentInputArea" class="space-y-4 mb-6">
+                <label id="t_lbl_content" class="block text-sm font-bold">Content</label>
+                <textarea id="payloadContent" rows="4" class="w-full p-4 border border-gray-300 dark:border-gray-600 bg-transparent rounded-xl outline-none resize-none" dir="auto"></textarea>
+            </div>
+
+            <div id="encryptInputArea" class="hidden space-y-4 mb-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl shadow-inner">
+                <label id="t_lbl_rec_pub" class="block text-sm font-bold text-indigo-800 dark:text-indigo-300 mb-1">Receiver's CQR Public Key</label>
+                <textarea id="receiverCqrPubKey" rows="3" class="w-full p-3 border border-indigo-300 dark:border-indigo-700 bg-white dark:bg-slate-900 rounded-lg outline-none resize-none text-xs" dir="ltr"></textarea>
+            </div>
+
+            <div id="didInputArea" class="hidden space-y-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label id="t_lbl_did_id" class="block text-sm font-bold mb-1">CQR ID</label>
+                        <input type="text" id="didId" class="w-full p-3 border border-gray-300 dark:border-gray-600 bg-transparent rounded-xl outline-none text-left" dir="ltr">
+                    </div>
+                    <div>
+                        <label id="t_lbl_did_url" class="block text-sm font-bold mb-1">Service Endpoint</label>
+                        <input type="text" id="serviceEndpoint" value="http://CQRCrypto.local" class="w-full p-3 border border-gray-300 dark:border-gray-600 bg-transparent rounded-xl outline-none text-left" dir="ltr">
+                    </div>
+                </div>
+            </div>
+
+            <button id="signBtn" class="btn bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg flex items-center gap-2 mx-auto">
+                <span id="btnActionText">🔐 Process Payload</span>
+            </button>
+        </div>
+
+        <div class="card p-6 md:p-8 mb-8 border-t-4 border-amber-500 bg-white dark:bg-slate-800" id="signedSection" style="display: none;">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">📤</span>
+                <h2 id="t_out_title" class="text-2xl font-bold">3. Secure Transmission Payload</h2>
+            </div>
+            <p id="t_out_desc" class="font-medium mb-4 text-sm text-gray-600 dark:text-gray-400">Data packaged successfully. Can be transmitted via radio or network.</p>
+            <div class="relative">
+                <textarea id="signedDocument" readonly rows="8" class="w-full p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-xl text-[11px] font-mono text-amber-900 dark:text-amber-200 outline-none resize-none shadow-inner" dir="ltr"></textarea>
+                <button data-copy="signedDocument" id="t_copy_3" class="absolute top-2 left-2 bg-amber-200 dark:bg-amber-800 hover:bg-amber-300 text-amber-900 dark:text-amber-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow">Copy Payload</button>
+            </div>
+        </div>
+
+        <div class="card p-6 md:p-8 mb-8 border-t-4 border-blue-500 bg-white dark:bg-slate-800" id="verifySection">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">🔍</span>
+                <h2 id="t_rx_title" class="text-2xl font-bold">4. Reception (Verify & Decrypt)</h2>
+            </div>
+            
+            <div class="flex gap-4 mb-6 bg-gray-100 dark:bg-slate-700 p-2 rounded-xl text-sm">
+                <button id="tabVerifyOnly" class="flex-1 py-2 rounded-lg font-bold text-gray-800 dark:text-gray-100 bg-white dark:bg-slate-600 shadow transition-all"><span id="t_tab_rx_sig">Verify Cleartext Signature</span></button>
+                <button id="tabDecryptMode" class="flex-1 py-2 rounded-lg font-bold text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all"><span id="t_tab_rx_dec">Decrypt Secret Payload</span></button>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label id="t_lbl_rx_json" class="block text-sm font-bold mb-1">📄 Paste Received Payload (JSON)</label>
+                    <textarea id="verifyDocumentInput" rows="5" class="w-full p-4 bg-white dark:bg-slate-900 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-mono outline-none resize-none" dir="ltr"></textarea>
+                </div>
+                <div>
+                    <label id="t_lbl_rx_pub" class="block text-sm font-bold mb-1">🌐 Sender's CQR Public Key</label>
+                    <textarea id="verifySenderCqrPubKey" rows="3" class="w-full p-3 bg-white dark:bg-slate-900 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-mono outline-none resize-none" dir="ltr"></textarea>
+                </div>
+            </div>
+
+            <button id="processReceiveBtn" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg flex items-center gap-2 mx-auto">
+                <span id="btnReceiveText">Process Payload</span>
+            </button>
+
+            <div id="verifyResult" class="mt-6 hidden p-4 rounded-xl text-center font-bold text-lg border"></div>
+            
+            <div id="decryptedOutputArea" class="mt-4 hidden text-left">
+                <label id="t_lbl_rx_out" class="block text-sm font-bold text-green-700 dark:text-green-400 mb-2">📖 Decrypted Secret Content:</label>
+                <textarea id="decryptedTextOutput" readonly rows="4" class="w-full p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-sm font-bold text-green-900 dark:text-green-100 outline-none resize-none shadow-inner"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="exportModal" class="fixed inset-0 modal-overlay hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-md transform transition-all">
+            <h3 id="t_mod_exp_title" class="text-2xl font-bold mb-2">Secure Military Identity</h3>
+            <p id="t_mod_exp_desc" class="text-sm text-gray-600 dark:text-gray-400 mb-6">Identity is encrypted using PBKDF2-SHA512 & AES-256-GCM. Strong password required.</p>
+            
+            <input type="password" id="exportPassword" class="w-full p-4 border-2 border-gray-300 dark:border-gray-600 bg-transparent rounded-xl outline-none mb-4 text-left font-mono" dir="ltr">
+            
+            <div class="bg-gray-50 dark:bg-slate-900 p-4 rounded-xl border border-gray-200 dark:border-gray-700 mb-6 text-sm space-y-2">
+                <div id="rule-length" class="rule-check invalid"><span id="t_rule_len">More than 10 characters</span></div>
+                <div id="rule-number" class="rule-check invalid"><span id="t_rule_num">Contains numbers</span></div>
+                <div id="rule-symbol" class="rule-check invalid"><span id="t_rule_sym">Contains symbols (@#$%)</span></div>
+                <div id="rule-emoji" class="rule-check invalid"><span id="t_rule_ar">Contains emoji or Non-English char</span></div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button id="cancelExportBtn" class="flex-1 py-3 rounded-xl font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors"><span id="t_btn_cancel_1">Cancel</span></button>
+                <button id="confirmExportBtn" disabled class="flex-1 py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg flex justify-center items-center gap-2">
+                    <span id="exportSpinner" class="hidden animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                    <span id="t_btn_enc_save">Encrypt & Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="importModal" class="fixed inset-0 modal-overlay hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-md transform transition-all">
+            <h3 id="t_mod_imp_title" class="text-2xl font-bold mb-2">Import Identity</h3>
+            <p id="t_mod_imp_desc" class="text-sm text-gray-600 dark:text-gray-400 mb-6">Enter password to decrypt the private key.</p>
+            
+            <input type="password" id="importPassword" class="w-full p-4 border-2 border-gray-300 dark:border-gray-600 bg-transparent rounded-xl outline-none mb-6 text-left font-mono" dir="ltr">
+            
+            <div class="flex gap-3">
+                <button id="cancelImportBtn" class="flex-1 py-3 rounded-xl font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-slate-700 transition-colors"><span id="t_btn_cancel_2">Cancel</span></button>
+                <button id="confirmImportBtn" class="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg flex justify-center items-center gap-2">
+                    <span id="importSpinner" class="hidden animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                    <span id="t_btn_dec_load">Decrypt</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast opacity-0 pointer-events-none bg-gray-800 dark:bg-slate-100 text-white dark:text-slate-900 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 font-bold"></div>
+
+    <script>
+        const dict = {
+            en: {
+                lang: "العربية", main_title: "🛡️ CQR Quantum Encryption System", sub_title: "Security Level: Grade 5 (Top Secret - ML-DSA-87 / ML-KEM-1024)",
+                id_mng: "1. Military Identity Management (CQR - Level 5)", gen_new: "🆕 Generate New Identity", import_saved: "💾 Import Saved Identity",
+                gen_btn: "Generate CQR Keys (Level 5)", import_file_title: "Import from Secure File", import_file_desc: "Upload encrypted identity file (.json)",
+                choose_file: "📂 Choose Encrypted File", or_manual: "Or manual entry", lbl_priv_imp: "CQR Private Key (Top Secret)",
+                lbl_pub_imp: "CQR Public Key (Sharable)", btn_manual: "✅ Adopt Manual Keys", btn_exp_priv: "🔒 Secure & Export Identity",
+                btn_exp_pub: "🌐 Share Identity (Public)", box_priv_title: "🔒 Private Key (CQR Private)", box_priv_warn: "⚠️ WARNING: Used for signing and decryption. DO NOT SHARE!",
+                box_pub_title: "🌐 Public Key (CQR Public)", box_pub_warn: "✅ Safe to share: Used to verify you and encrypt messages to you.", copy: "Copy",
+                send_title: "2. Transmission (Sign & Encrypt)", tab_msg: "📝 Message (Sign)", tab_enc: "🔒 Message (Encrypt + Sign)", tab_did: "🪪 DID Document",
+                lbl_content: "Content", lbl_rec_pub: "Receiver's CQR Public Key", lbl_did_id: "CQR ID", lbl_did_url: "Service Endpoint",
+                btn_act_msg: "✍️ Sign Cleartext Message", btn_act_enc: "🔐 Encrypt & Sign Payload", btn_act_did: "🪪 Sign DID Document",
+                out_title: "3. Secure Transmission Payload", out_desc: "Data packaged successfully. Can be transmitted via radio or network.",
+                copy_pay: "Copy Payload", rx_title: "4. Reception (Verify & Decrypt)", tab_rx_sig: "Verify Cleartext Signature",
+                tab_rx_dec: "Decrypt Secret Payload", lbl_rx_json: "📄 Paste Received Payload (JSON)", lbl_rx_pub: "🌐 Sender's CQR Public Key",
+                btn_rx_ver: "Verify Signature", btn_rx_dec: "Decrypt & Verify Payload", lbl_rx_out: "📖 Decrypted Secret Content:",
+                mod_exp_title: "Secure Military Identity", mod_exp_desc: "Identity is encrypted using PBKDF2-SHA512 & AES-256-GCM. Strong password required.",
+                rule_len: "More than 10 characters", rule_num: "Contains numbers", rule_sym: "Contains symbols (@#$%)", rule_ar: "Contains emoji or Non-English char",
+                btn_cancel: "Cancel", btn_enc_save: "Encrypt & Save", mod_imp_title: "Import Identity", mod_imp_desc: "Enter password to decrypt the private key.",
+                btn_dec_load: "Decrypt", ph_priv: "Paste private key here...", ph_pub: "Paste public key here...", ph_rec: "Paste receiver's public key here...",
+                ph_did: "Auto-generated", ph_content: "Type your message here...", ph_rx: "Paste sender's public key here...", ph_pass: "Password...",
+                msg_gen_ok: "CQR Level 5 Identity activated ✅", msg_req_keys: "Please enter both keys", msg_exp_ok: "Export successful 🌐",
+                msg_enc_ok: "Encrypted & Saved 🔒", msg_unsupp_fmt: "Unsupported key format", msg_inv_file: "Invalid file", msg_req_pass: "Enter password",
+                msg_copied: "Copied 👍", msg_req_id: "Setup military identity first", msg_pkg_ok: "Payload secured at Level 5 ✅",
+                msg_req_rx: "Please input payload and sender's public key", msg_val_ok: "✅ Valid Level 5 Signature", msg_val_desc: "Payload is authentic and sender is verified.",
+                msg_val_err: "❌ Security Warning: Invalid", msg_val_err_desc: "Content manipulated or sender key is incorrect.", msg_tech_err: "⚠️ Technical Error:",
+                err_empty: "Please write a message", err_ver: "Unsupported CQR Key Version", err_tamp: "Key is corrupted or tampered", err_pass: "Wrong password or corrupted file",
+                err_inc: "Incomplete data", err_fmt: "Unsupported cleartext format", err_pl: "This payload is not a valid encrypted message",
+                err_init: "Key initialization error: Ensure recipient's private key & sender's public key are correct", err_ext: "Fatal error during key extraction",
+                err_dec: "Decryption Failed 🔒: Private key does not match intended recipient or message tampered", err_inv: "Decrypted, but content format invalid",
+                err_sig: "Technical error while verifying sender's digital signature", err_alert: "High Security Alert: Decryption successful, but signature forged (Impersonation)"
+            },
+            ar: {
+                lang: "English", main_title: "🛡️ نظام CQR للتشفير الكمومي", sub_title: "مستوى الأمان: الدرجة الخامسة (Top Secret - ML-DSA-87 / ML-KEM-1024)",
+                id_mng: "1. إدارة الهوية العسكرية (CQR - Level 5)", gen_new: "🆕 توليد هوية جديدة", import_saved: "💾 استرداد هوية محفوظة",
+                gen_btn: "توليد مفاتيح CQR المدمجة (مستوى 5)", import_file_title: "استرداد من ملف آمن", import_file_desc: "قم برفع ملف الهوية المشفرة (.json)",
+                choose_file: "📂 اختر ملف الهوية المشفرة", or_manual: "أو إدخال يدوي مباشر", lbl_priv_imp: "المفتاح الخاص CQR (سري للغاية)",
+                lbl_pub_imp: "المفتاح العام CQR (متاح للمشاركة)", btn_manual: "✅ اعتماد المفاتيح اليدوية", btn_exp_priv: "🔒 تأمين وتصدير الهوية",
+                btn_exp_pub: "🌐 مشاركة الهوية (العامة)", box_priv_title: "🔒 المفتاح الخاص", box_priv_warn: "⚠️ تحذير: يستخدم للتوقيع وفك التشفير. يمنع مشاركته نهائياً!",
+                box_pub_title: "🌐 المفتاح العام", box_pub_warn: "✅ آمن للمشاركة: يستخدم للتحقق من هويتك وتشفير الرسائل الواردة.", copy: "نسخ",
+                send_title: "2. الإرسال (توقيع وتشفير)", tab_msg: "📝 رسالة (توقيع فقط)", tab_enc: "🔒 رسالة (تشفير + توقيع)", tab_did: "🪪 وثيقة هوية",
+                lbl_content: "المحتوى", lbl_rec_pub: "المفتاح العام للمستلم", lbl_did_id: "المعرف العسكري", lbl_did_url: "رابط نقطة الاتصال",
+                btn_act_msg: "✍️ توقيع الرسالة بوضوح", btn_act_enc: "🔐 تشفير وتوقيع الحزمة عسكرياً", btn_act_did: "🪪 توقيع وثيقة الهوية (DID)",
+                out_title: "3. حزمة الإرسال الآمنة", out_desc: "تمت معالجة وتغليف البيانات بنجاح. يمكن نقل هذا الكود عبر أي قناة.",
+                copy_pay: "نسخ الحزمة", rx_title: "4. الاستقبال (التحقق وفك التشفير)", tab_rx_sig: "التحقق من صحة توقيع",
+                tab_rx_dec: "فك التشفير للحزم السرية", lbl_rx_json: "📄 ألصق الحزمة المُستلمة (JSON)", lbl_rx_pub: "🌐 المفتاح العام للمُرسل",
+                btn_rx_ver: "فحص وتأكيد المصدر", btn_rx_dec: "فك التشفير للحزم السرية", lbl_rx_out: "📖 محتوى التقرير السري:",
+                mod_exp_title: "تأمين الهوية العسكرية", mod_exp_desc: "يتم التشفير بمستوى SHA-512 و AES-256-GCM. تعيين كلمة مرور قوية إلزامي.",
+                rule_len: "أكثر من 10 أحرف", rule_num: "تحتوي على أرقام", rule_sym: "تحتوي على رموز (@#$%)", rule_ar: "تحتوي إيموجي أو حرف غير إنجليزي",
+                btn_cancel: "إلغاء", btn_enc_save: "تشفير وحفظ", mod_imp_title: "استرداد الهوية", mod_imp_desc: "أدخل كلمة المرور لفك التشفير.",
+                btn_dec_load: "فك التشفير", ph_priv: "ألصق المفتاح الخاص هنا...", ph_pub: "ألصق المفتاح العام هنا...", ph_rec: "ألصق المفتاح العام للمستلم هنا...",
+                ph_did: "توليد تلقائي", ph_content: "اكتب رسالتك هنا...", ph_rx: "ألصق المفتاح العام للمرسل هنا...", ph_pass: "كلمة المرور...",
+                msg_gen_ok: "تم اعتماد هوية CQR المستوى 5 بنجاح ✅", msg_req_keys: "يرجى إدخال المفتاحين", msg_exp_ok: "تم التصدير بنجاح 🌐",
+                msg_enc_ok: "تم التشفير والحفظ 🔒", msg_unsupp_fmt: "صيغة غير مدعومة للمفتاح", msg_inv_file: "ملف غير صالح", msg_req_pass: "أدخل كلمة المرور",
+                msg_copied: "تم النسخ 👍", msg_req_id: "قم بإعداد هويتك العسكرية أولاً", msg_pkg_ok: "تم تأمين وتغليف الحزمة بمستوى 5 ✅",
+                msg_req_rx: "الرجاء إدخال الحزمة ومفتاح المُرسل", msg_val_ok: "✅ توقيع عسكري معتمد", msg_val_desc: "الحزمة آمنة وتم التحقق من المصدر قطعيًا.",
+                msg_val_err: "❌ تحذير أمني: غير صالح", msg_val_err_desc: "تم التلاعب بالمحتوى أو المفتاح خاطئ.", msg_tech_err: "⚠️ خطأ فني:",
+                err_empty: "الرجاء كتابة رسالة", err_ver: "نسخة مفتاح CQR غير مدعومة", err_tamp: "المفتاح تالف أو تم التلاعب به", err_pass: "كلمة المرور خاطئة أو الملف تالف",
+                err_inc: "بيانات غير مكتملة", err_fmt: "صيغة غير مدعومة", err_pl: "الحزمة ليست رسالة مشفرة صالحة",
+                err_init: "خطأ في المفاتيح: تأكد من صحة مفتاح المستلم الخاص ومفتاح المرسل العام", err_ext: "خطأ فادح أثناء استخراج المفتاح",
+                err_dec: "فشل فك التشفير 🔒: المفتاح لا يطابق المستلم أو تم التلاعب بالرسالة", err_inv: "تم فك التشفير لكن المحتوى غير صالح",
+                err_sig: "حدث خطأ أثناء التحقق من التوقيع الرقمي للمرسل", err_alert: "إنذار أمني عالي: تم فك التشفير لكن التوقيع مزور (انتحال شخصية محتمل)"
+            }
+        };
+
+        const errorMap = {
+            "الرجاء كتابة رسالة (Message cannot be empty)": "err_empty",
+            "Unsupported CQR Key Version": "err_ver",
+            "Key is corrupted or tampered": "err_tamp",
+            "Wrong password or corrupted file": "err_pass",
+            "Incomplete data": "err_inc",
+            "Unsupported cleartext format": "err_fmt",
+            "This payload is not a valid encrypted message": "err_pl",
+            "Key initialization error: Please ensure that the recipient's private key and the sender's public key are entered correctly": "err_init",
+            "Fatal error during key extraction": "err_ext",
+            "Decryption Failed 🔒: The private key provided does not match the intended recipient, or the message has been tampered with in transit": "err_dec",
+            "Decrypted, but the content format is invalid": "err_inv",
+            "A technical error occurred while verifying the sender's digital signature": "err_sig",
+            "High Security Alert: Decryption successful, but digital signature is forged and does not match the sender's public key (Possible impersonation)": "err_alert"
+        };
+
+        let currentLang = 'en';
+
+        function updateUI() {
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+            document.getElementById('langToggleBtn').textContent = dict[currentLang].lang;
+            document.getElementById('t_main_title').textContent = dict[currentLang].main_title;
+            document.getElementById('t_sub_title').textContent = dict[currentLang].sub_title;
+            document.getElementById('t_id_mng').textContent = dict[currentLang].id_mng;
+            document.getElementById('t_gen_new').textContent = dict[currentLang].gen_new;
+            document.getElementById('t_import_saved').textContent = dict[currentLang].import_saved;
+            document.getElementById('t_gen_btn').textContent = dict[currentLang].gen_btn;
+            document.getElementById('t_import_file_title').textContent = dict[currentLang].import_file_title;
+            document.getElementById('t_import_file_desc').textContent = dict[currentLang].import_file_desc;
+            document.getElementById('t_choose_file').textContent = dict[currentLang].choose_file;
+            document.getElementById('t_or_manual').textContent = dict[currentLang].or_manual;
+            document.getElementById('t_lbl_priv_imp').textContent = dict[currentLang].lbl_priv_imp;
+            document.getElementById('t_lbl_pub_imp').textContent = dict[currentLang].lbl_pub_imp;
+            document.getElementById('t_btn_manual').textContent = dict[currentLang].btn_manual;
+            document.getElementById('t_btn_exp_priv').textContent = dict[currentLang].btn_exp_priv;
+            document.getElementById('t_btn_exp_pub').textContent = dict[currentLang].btn_exp_pub;
+            document.getElementById('t_box_priv_title').textContent = dict[currentLang].box_priv_title;
+            document.getElementById('t_box_priv_warn').textContent = dict[currentLang].box_priv_warn;
+            document.getElementById('t_box_pub_title').textContent = dict[currentLang].box_pub_title;
+            document.getElementById('t_box_pub_warn').textContent = dict[currentLang].box_pub_warn;
+            document.getElementById('t_copy_1').textContent = dict[currentLang].copy;
+            document.getElementById('t_copy_2').textContent = dict[currentLang].copy;
+            document.getElementById('t_send_title').textContent = dict[currentLang].send_title;
+            document.getElementById('t_tab_msg').textContent = dict[currentLang].tab_msg;
+            document.getElementById('t_tab_enc').textContent = dict[currentLang].tab_enc;
+            document.getElementById('t_tab_did').textContent = dict[currentLang].tab_did;
+            document.getElementById('t_lbl_content').textContent = dict[currentLang].lbl_content;
+            document.getElementById('t_lbl_rec_pub').textContent = dict[currentLang].lbl_rec_pub;
+            document.getElementById('t_lbl_did_id').textContent = dict[currentLang].lbl_did_id;
+            document.getElementById('t_lbl_did_url').textContent = dict[currentLang].lbl_did_url;
+            document.getElementById('t_out_title').textContent = dict[currentLang].out_title;
+            document.getElementById('t_out_desc').textContent = dict[currentLang].out_desc;
+            document.getElementById('t_copy_3').textContent = dict[currentLang].copy_pay;
+            document.getElementById('t_rx_title').textContent = dict[currentLang].rx_title;
+            document.getElementById('t_tab_rx_sig').textContent = dict[currentLang].tab_rx_sig;
+            document.getElementById('t_tab_rx_dec').textContent = dict[currentLang].tab_rx_dec;
+            document.getElementById('t_lbl_rx_json').textContent = dict[currentLang].lbl_rx_json;
+            document.getElementById('t_lbl_rx_pub').textContent = dict[currentLang].lbl_rx_pub;
+            document.getElementById('t_lbl_rx_out').textContent = dict[currentLang].lbl_rx_out;
+            document.getElementById('t_mod_exp_title').textContent = dict[currentLang].mod_exp_title;
+            document.getElementById('t_mod_exp_desc').textContent = dict[currentLang].mod_exp_desc;
+            document.getElementById('t_rule_len').textContent = dict[currentLang].rule_len;
+            document.getElementById('t_rule_num').textContent = dict[currentLang].rule_num;
+            document.getElementById('t_rule_sym').textContent = dict[currentLang].rule_sym;
+            document.getElementById('t_rule_ar').textContent = dict[currentLang].rule_ar;
+            document.getElementById('t_btn_cancel_1').textContent = dict[currentLang].btn_cancel;
+            document.getElementById('t_btn_cancel_2').textContent = dict[currentLang].btn_cancel;
+            document.getElementById('t_btn_enc_save').textContent = dict[currentLang].btn_enc_save;
+            document.getElementById('t_mod_imp_title').textContent = dict[currentLang].mod_imp_title;
+            document.getElementById('t_mod_imp_desc').textContent = dict[currentLang].mod_imp_desc;
+            document.getElementById('t_btn_dec_load').textContent = dict[currentLang].btn_dec_load;
+
+            document.getElementById('importCqrPriv').placeholder = dict[currentLang].ph_priv;
+            document.getElementById('importCqrPub').placeholder = dict[currentLang].ph_pub;
+            document.getElementById('receiverCqrPubKey').placeholder = dict[currentLang].ph_rec;
+            document.getElementById('didId').placeholder = dict[currentLang].ph_did;
+            document.getElementById('payloadContent').placeholder = dict[currentLang].ph_content;
+            document.getElementById('verifySenderCqrPubKey').placeholder = dict[currentLang].ph_rx;
+            document.getElementById('exportPassword').placeholder = dict[currentLang].ph_pass;
+            document.getElementById('importPassword').placeholder = dict[currentLang].ph_pass;
+
+            setupPayloadUI(currentMode);
+            const rModeText = currentReceiveMode === 'verify' ? dict[currentLang].btn_rx_ver : dict[currentLang].btn_rx_dec;
+            document.getElementById('btnReceiveText').textContent = rModeText;
+            
+            const alignClasses = currentLang === 'en' ? ['text-left', 'text-right'] : ['text-right', 'text-left'];
+            document.getElementById('decryptedOutputArea').classList.replace(alignClasses[1], alignClasses[0]);
+        }
+
+        function getErrorText(eMsg) {
+            const code = errorMap[eMsg];
+            return code ? dict[currentLang][code] : eMsg;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('langToggleBtn').addEventListener('click', () => {
+                currentLang = currentLang === 'en' ? 'ar' : 'en';
+                updateUI();
+            });
+            updateUI();
+        });
+
+        const cqr = new CQRCrypto();
+        let currentMode = 'message'; 
+        let currentReceiveMode = 'verify';
+        let importedEncryptedData = null; 
+
+        const el = {
+            generateBtn: document.getElementById('generateBtn'),
+            keysOutput: document.getElementById('keysOutput'),
+            cqrPrivOut: document.getElementById('cqrPrivOut'), cqrPubOut: document.getElementById('cqrPubOut'),
+            importCqrPriv: document.getElementById('importCqrPriv'), importCqrPub: document.getElementById('importCqrPub'),
+            receiverCqrPubKey: document.getElementById('receiverCqrPubKey'), verifySenderCqrPubKey: document.getElementById('verifySenderCqrPubKey'),
+            tabGen: document.getElementById('tabGenerateKey'), tabImp: document.getElementById('tabImportKey'),
+            genArea: document.getElementById('generateKeyArea'), impArea: document.getElementById('importKeyArea'),
+            exportPrivBtn: document.getElementById('exportPrivateBtn'), exportPubBtn: document.getElementById('exportPublicBtn'),
+            exportModal: document.getElementById('exportModal'), exportPassword: document.getElementById('exportPassword'),
+            cancelExportBtn: document.getElementById('cancelExportBtn'), confirmExportBtn: document.getElementById('confirmExportBtn'),
+            exportSpinner: document.getElementById('exportSpinner'),
+            rules: { length: document.getElementById('rule-length'), number: document.getElementById('rule-number'), symbol: document.getElementById('rule-symbol'), emoji: document.getElementById('rule-emoji') },
+            fileInput: document.getElementById('identityFileInput'), triggerFileBtn: document.getElementById('triggerFileInputBtn'),
+            importManualBtn: document.getElementById('importManualBtn'), importModal: document.getElementById('importModal'),
+            importPassword: document.getElementById('importPassword'), cancelImportBtn: document.getElementById('cancelImportBtn'),
+            confirmImportBtn: document.getElementById('confirmImportBtn'), importSpinner: document.getElementById('importSpinner'),
+            toast: document.getElementById('toast'), payloadSection: document.getElementById('payloadSection'), signBtn: document.getElementById('signBtn')
+        };
+
+        const showToast = (msgKey, type = 'success') => {
+            el.toast.textContent = dict[currentLang][msgKey] || msgKey; 
+            el.toast.className = `toast ${type === 'error' ? 'bg-red-600' : 'bg-gray-800 dark:bg-slate-100'} text-white dark:text-slate-900 px-6 py-3 rounded-xl shadow-2xl transition-opacity z-50 font-bold`;
+            el.toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => el.toast.classList.add('opacity-0', 'pointer-events-none'), 3500);
+        };
+
+        const downloadJson = (filename, obj) => {
+            const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        };
+
+        const validatePassword = (pw) => {
+            const rules = {
+                length: pw.length > 10, number: /\d/.test(pw), symbol: /[!@#$%^&*(),.?":{}|<>\-_=+\/\[\]\\]/.test(pw),
+                emoji: /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(pw) || /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu.test(pw)
+            };
+            const updateRuleUI = (element, isValid) => { element.className = `rule-check ${isValid ? 'valid' : 'invalid'}`; };
+            updateRuleUI(el.rules.length, rules.length); updateRuleUI(el.rules.number, rules.number);
+            updateRuleUI(el.rules.symbol, rules.symbol); updateRuleUI(el.rules.emoji, rules.emoji);
+            return rules.length && rules.number && rules.symbol && rules.emoji;
+        };
+
+        el.exportPassword.addEventListener('input', (e) => { el.confirmExportBtn.disabled = !validatePassword(e.target.value); });
+
+        function switchTab(activeBtn, allBtns) {
+            allBtns.forEach(b => { b.classList.replace('text-gray-800', 'text-gray-500'); b.classList.replace('dark:text-gray-100', 'dark:text-gray-400'); b.classList.replace('bg-white', 'bg-transparent'); b.classList.replace('dark:bg-slate-600', 'bg-transparent'); b.classList.remove('shadow'); });
+            activeBtn.classList.replace('text-gray-500', 'text-gray-800'); activeBtn.classList.replace('dark:text-gray-400', 'dark:text-gray-100'); activeBtn.classList.replace('bg-transparent', 'bg-white'); activeBtn.classList.replace('bg-transparent', 'dark:bg-slate-600'); activeBtn.classList.add('shadow');
+        }
+
+        el.tabGen.addEventListener('click', () => { switchTab(el.tabGen,[el.tabGen, el.tabImp]); el.genArea.classList.remove('hidden'); el.impArea.classList.add('hidden'); });
+        el.tabImp.addEventListener('click', () => { switchTab(el.tabImp,[el.tabGen, el.tabImp]); el.impArea.classList.remove('hidden'); el.genArea.classList.add('hidden'); });
+
+        function activateCQRKeys(cqrPrivStr, cqrPubStr) {
+            el.cqrPrivOut.value = cqrPrivStr; 
+            el.cqrPubOut.value = cqrPubStr;
+            el.keysOutput.classList.remove('hidden'); 
+            el.payloadSection.style.display = 'block';
+            showToast('msg_gen_ok');
+        }
+
+        el.generateBtn.addEventListener('click', () => {
+            el.generateBtn.disabled = true; document.getElementById('spinner').classList.remove('hidden');
+            setTimeout(() => {
+                const identity = cqr.generateIdentity();
+                activateCQRKeys(identity.cqrPrivateKey, identity.cqrPublicKey);
+                el.generateBtn.disabled = false; document.getElementById('spinner').classList.add('hidden');
+            }, 100); 
+        });
+
+        el.importManualBtn.addEventListener('click', () => {
+            const privStr = el.importCqrPriv.value.trim(); const pubStr = el.importCqrPub.value.trim();
+            if(!privStr || !pubStr) return showToast('msg_req_keys', 'error');
+            try {
+                cqr.unpackCQRKeys(cqr.base64urlToBytes(privStr));
+                cqr.unpackCQRKeys(cqr.base64urlToBytes(pubStr));
+                activateCQRKeys(privStr, pubStr);
+            } catch(e) { showToast(getErrorText(e.message), 'error'); }
+        });
+
+        el.exportPubBtn.addEventListener('click', () => {
+            if (!el.cqrPubOut.value) return;
+            const pubIdentity = { developer: cqr.DEVELOPER_ID, system: cqr.SYSTEM_ID, type: "CQRPublicIdentity", cqrPublicKey: el.cqrPubOut.value };
+            downloadJson('cqr-level5-public.json', pubIdentity); showToast('msg_exp_ok');
+        });
+
+        el.exportPrivBtn.addEventListener('click', () => {
+            if (!el.cqrPrivOut.value) return; el.exportPassword.value = ''; validatePassword(''); el.exportModal.classList.remove('hidden');
+        });
+        el.cancelExportBtn.addEventListener('click', () => el.exportModal.classList.add('hidden'));
+
+        el.confirmExportBtn.addEventListener('click', async () => {
+            const pw = el.exportPassword.value; if (!validatePassword(pw)) return;
+            el.confirmExportBtn.disabled = true; el.exportSpinner.classList.remove('hidden');
+            try {
+                const keysToEncrypt = { cqrPrivateKey: el.cqrPrivOut.value, cqrPublicKey: el.cqrPubOut.value };
+                const encryptedIdentity = await cqr.encryptIdentity(keysToEncrypt, pw);
+                downloadJson('cqr-level5-encrypted.json', encryptedIdentity); showToast('msg_enc_ok');
+                el.exportModal.classList.add('hidden');
+            } catch (err) { showToast(getErrorText(err.message), 'error'); } 
+            finally { el.confirmExportBtn.disabled = false; el.exportSpinner.classList.add('hidden'); }
+        });
+
+        el.triggerFileBtn.addEventListener('click', () => el.fileInput.click());
+        el.fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.type === "CQREncryptedIdentity") {
+                        importedEncryptedData = data; el.importPassword.value = ''; el.importModal.classList.remove('hidden');
+                    } else showToast('msg_unsupp_fmt', 'error');
+                } catch (err) { showToast('msg_inv_file', 'error'); }
+            };
+            reader.readAsText(file); el.fileInput.value = '';
+        });
+
+        el.cancelImportBtn.addEventListener('click', () => el.importModal.classList.add('hidden'));
+        el.confirmImportBtn.addEventListener('click', async () => {
+            const pw = el.importPassword.value; if (!pw) return showToast('msg_req_pass', 'error');
+            el.confirmImportBtn.disabled = true; el.importSpinner.classList.remove('hidden');
+            try {
+                const keysData = await cqr.decryptIdentity(importedEncryptedData, pw);
+                activateCQRKeys(keysData.cqrPrivateKey, keysData.cqrPublicKey);
+                el.importModal.classList.add('hidden');
+            } catch (err) { showToast(getErrorText(err.message), 'error'); } 
+            finally { el.confirmImportBtn.disabled = false; el.importSpinner.classList.add('hidden'); }
+        });
+
+        document.addEventListener('click', async (e) => {
+            const btn = e.target.closest('[data-copy]'); if (!btn) return;
+            const target = document.getElementById(btn.getAttribute('data-copy'));
+            try { await navigator.clipboard.writeText(target.value); showToast('msg_copied'); } 
+            catch { target.select(); document.execCommand('copy'); showToast('msg_copied'); }
+        });
+
+        const setupPayloadUI = (mode) => {
+            currentMode = mode;
+            document.getElementById('contentInputArea').classList.toggle('hidden', mode === 'did');
+            document.getElementById('didInputArea').classList.toggle('hidden', mode !== 'did');
+            document.getElementById('encryptInputArea').classList.toggle('hidden', mode !== 'encrypt');
+            const btnText = document.getElementById('btnActionText');
+            if(mode === 'message') btnText.textContent = dict[currentLang].btn_act_msg;
+            if(mode === 'encrypt') btnText.textContent = dict[currentLang].btn_act_enc;
+            if(mode === 'did') btnText.textContent = dict[currentLang].btn_act_did;
+        };
+
+        document.getElementById('tabMessage').addEventListener('click', (e) => { switchTab(e.target,[document.getElementById('tabMessage'), document.getElementById('tabEncrypt'), document.getElementById('tabDid')]); setupPayloadUI('message'); });
+        document.getElementById('tabEncrypt').addEventListener('click', (e) => { switchTab(e.target,[document.getElementById('tabMessage'), document.getElementById('tabEncrypt'), document.getElementById('tabDid')]); setupPayloadUI('encrypt'); });
+        document.getElementById('tabDid').addEventListener('click', (e) => { switchTab(e.target,[document.getElementById('tabMessage'), document.getElementById('tabEncrypt'), document.getElementById('tabDid')]); setupPayloadUI('did'); });
+
+        el.signBtn.addEventListener('click', async () => {
+            const privKey = el.cqrPrivOut.value.trim();
+            const pubKey = el.cqrPubOut.value.trim();
+            if (!privKey || !pubKey) return showToast('msg_req_id', 'error');
+            
+            el.signBtn.disabled = true;
+            try {
+                let finalJsonOut;
+                if (currentMode === 'message') {
+                    finalJsonOut = cqr.signMessage(document.getElementById('payloadContent').value.trim(), privKey);
+                } 
+                else if (currentMode === 'did') {
+                    finalJsonOut = cqr.signDID(document.getElementById('didId').value.trim(), document.getElementById('serviceEndpoint').value, privKey, pubKey);
+                }
+                else if (currentMode === 'encrypt') {
+                    let receiverCqrStr = el.receiverCqrPubKey.value.trim();
+                    if (receiverCqrStr.startsWith('{')) {
+                        try { const parsedKey = JSON.parse(receiverCqrStr); if (parsedKey.cqrPublicKey) receiverCqrStr = parsedKey.cqrPublicKey; } catch (e) {}
+                    }
+                    finalJsonOut = await cqr.encryptSecretMessage(document.getElementById('payloadContent').value.trim(), receiverCqrStr, privKey);
+                }
+
+                const outputStr = JSON.stringify(finalJsonOut, null, 2);
+                document.getElementById('signedDocument').value = outputStr;
+                document.getElementById('verifyDocumentInput').value = outputStr; 
+                document.getElementById('signedSection').style.display = 'block';
+                document.getElementById('signedSection').scrollIntoView({ behavior: 'smooth' });
+                showToast('msg_pkg_ok');
+            } catch (err) { showToast(getErrorText(err.message), 'error'); } 
+            finally { el.signBtn.disabled = false; }
+        });
+
+        document.getElementById('tabVerifyOnly').addEventListener('click', (e) => { switchTab(e.target,[document.getElementById('tabVerifyOnly'), document.getElementById('tabDecryptMode')]); currentReceiveMode = 'verify'; document.getElementById('btnReceiveText').textContent = dict[currentLang].btn_rx_ver; });
+        document.getElementById('tabDecryptMode').addEventListener('click', (e) => { switchTab(e.target,[document.getElementById('tabVerifyOnly'), document.getElementById('tabDecryptMode')]); currentReceiveMode = 'decrypt'; document.getElementById('btnReceiveText').textContent = dict[currentLang].btn_rx_dec; });
+
+        document.getElementById('processReceiveBtn').addEventListener('click', async () => {
+            const resultBox = document.getElementById('verifyResult');
+            const decryptedOutArea = document.getElementById('decryptedOutputArea');
+            resultBox.className = 'mt-6 p-4 rounded-xl text-center font-bold text-lg border';
+            decryptedOutArea.classList.add('hidden');
+
+            try {
+                const docStr = document.getElementById('verifyDocumentInput').value.trim();
+                let senderCqrStr = el.verifySenderCqrPubKey.value.trim();
+                
+                if (senderCqrStr.startsWith('{')) {
+                    try { const parsedKey = JSON.parse(senderCqrStr); if (parsedKey.cqrPublicKey) senderCqrStr = parsedKey.cqrPublicKey; } catch (e) {}
+                }
+
+                if (!docStr || !senderCqrStr) throw new Error(dict[currentLang].msg_req_rx);
+
+                const parsedDoc = JSON.parse(docStr);
+                let isValid = false;
+
+                if (currentReceiveMode === 'verify') {
+                    isValid = cqr.verifyCleartextMessage(parsedDoc, senderCqrStr);
+                } else if (currentReceiveMode === 'decrypt') {
+                    const receiverPrivKey = el.cqrPrivOut.value.trim();
+                    if (!receiverPrivKey) throw new Error(dict[currentLang].msg_req_id);
+                    const result = await cqr.decryptSecretMessage(parsedDoc, senderCqrStr, receiverPrivKey);
+                    isValid = result.isValid;
+                    if(isValid) { document.getElementById('decryptedTextOutput').value = result.message; decryptedOutArea.classList.remove('hidden'); }
+                }
+
+                resultBox.innerHTML = ''; 
+                const titleEl = document.createElement('b');
+                const descEl = document.createElement('div');
+                descEl.className = 'text-sm font-normal mt-1';
+
+                if (isValid) {
+                    titleEl.textContent = dict[currentLang].msg_val_ok;
+                    descEl.textContent = dict[currentLang].msg_val_desc;
+                    resultBox.classList.add('bg-green-100', 'text-green-800', 'border-green-300', 'dark:bg-green-900/30', 'dark:text-green-400', 'dark:border-green-800');
+                } else {
+                    titleEl.textContent = dict[currentLang].msg_val_err;
+                    descEl.textContent = dict[currentLang].msg_val_err_desc;
+                    resultBox.classList.add('bg-red-100', 'text-red-800', 'border-red-300', 'dark:bg-red-900/30', 'dark:text-red-400', 'dark:border-red-800');
+                }
+                resultBox.appendChild(titleEl);
+                resultBox.appendChild(descEl);
+
+            } catch (err) {
+                resultBox.innerHTML = ''; 
+                const titleEl = document.createElement('b'); titleEl.textContent = dict[currentLang].msg_tech_err;
+                const descEl = document.createElement('div'); descEl.className = 'text-sm font-normal mt-1';
+                descEl.textContent = getErrorText(err.message);
+                resultBox.classList.add('bg-red-100', 'text-red-800', 'border-red-300', 'dark:bg-red-900/30', 'dark:text-red-400', 'dark:border-red-800');
+                resultBox.appendChild(titleEl); resultBox.appendChild(descEl);
+            }
+        });
+    </script>
+</body>
+</html>
